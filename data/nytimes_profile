@@ -1,0 +1,29 @@
+{
+    "website": "www.nytimes.com www.twitter.com/nytimes www.youtube.com/nytimes", 
+    "username": "nytimes", 
+    "about": "Welcome to The New York Times on Facebook - a hub for conversation about news and ideas. Like our page and connect with Times journalists and readers. ", 
+    "likes": 2349750, 
+    "name": "The New York Times", 
+    "talking_about_count": 263160, 
+    "cover": {
+        "source": "http://sphotos-b.xx.fbcdn.net/hphotos-ash3/s720x720/540635_10150175118159999_2034272309_n.jpg", 
+        "cover_id": "10150175118159999", 
+        "offset_y": 0
+    }, 
+    "mission": "We aim to create a space on Facebook.com/NYTimes where readers can exchange intelligent and informed commentary that enhances the quality of our news and information. We value thoughtful comments representing a range of views that make their point politely. A few things we won't tolerate on our Facebook wall: personal attacks, obscenity, vulgarity, profanity (including expletives and letters followed by dashes) and commercial promotion. While most comments will remain posted if they are on-topic and not abusive, moderating decisions are subjective. We will make them as carefully and consistently as we can. \n\nThank you for joining The New York Times community on Facebook. ", 
+    "founded": "1851", 
+    "link": "http://www.facebook.com/nytimes", 
+    "location": {
+        "city": "New York", 
+        "zip": "10018", 
+        "country": "United States", 
+        "longitude": -73.990124360458, 
+        "state": "NY", 
+        "street": "620 8th Avenue", 
+        "latitude": 40.756146442354
+    }, 
+    "category": "Media/news/publishing", 
+    "checkins": 4443, 
+    "id": "5281959998", 
+    "is_published": true
+}
