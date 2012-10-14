@@ -17,6 +17,8 @@ query = "SELECT message, attachment, likes, message_tags, description, descripti
 
 fqldata = fb_api.fql(query) 
 
+print "test"
+
 #fb_response.keys = ['paging','data']
 #data = fb_response['data']
 #next_page = fb_response['paging']
