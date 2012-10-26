@@ -10,7 +10,7 @@ from db_help import *
 import multiprocessing
 
 #GLOBALS
-FB_MAX_QUERIES = 600 #600 queries per IP per token per seconds hitting FB API
+FB_MAX_QUERIES = 200 #600 queries per IP per token per seconds hitting FB API
 access_token=open('out/facebook.access_token').read()
 
 ############### FB HELPERS #####################
@@ -102,19 +102,18 @@ def insert_post_data(posts,next_page_url,num_queries):
 	#while there is still posts left, collect the posts
 	while(num_posts < 100):
 		
+		if(posts == None): break
 		if(len(posts)==0): break
+		
+		#if we hit the FB rate limit, then wait before we query again 
 		if(num_queries > FB_MAX_QUERIES):
 			curr = datetime.datetime.utcnow()
 			time_delta = curr-start
 			time_delta = time_delta.total_seconds()
 			
-			#if we hit the FB rate limit, then wait before we query again 
-			if(time_delta < 600):
-				num_queries = 0
-				time.sleep(600 - time_delta + 100) #add 100 second buffer
-			#if it took more than an hour, then reduce num_queries based on hr
-			else:
-				num_queries = int(num_queries*(time_delta/600))
+			#if it took us less than alotted time, then wait 15 minutes
+			num_queries = 0
+			time.sleep(600) #wait limit time of 600 seconds
 
 			start = datetime.datetime.utcnow()
 
@@ -149,12 +148,15 @@ def crawl(db,fb_news):
 	fb_id = fb_news['id']
 	print "Getting page data for",pagename 
 	#get post data from the news property
-	fb_response = fb_api.get_connections(fb_id,"posts")
-	num_queries+=1
+	while(True):
+		fb_response = fb_api.get_connections(fb_id,"posts")
+		num_queries+=1
 
-	posts = fb_response['data']
-	next_page_url = fb_response['paging']['next']
-	insert_post_data(posts,next_page_url,num_queries)
+		posts = fb_response['data']
+		next_page_url = fb_response['paging']['next']
+		insert_post_data(posts,next_page_url,num_queries)
+		#wait 15 minutes before we crawl again
+		time.sleep(900)
 
 		
 
