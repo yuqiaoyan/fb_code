@@ -1,41 +1,12 @@
+from my_tokenizers import *
 import nltk
 import os
 import pandas as pd
 
-def tokenize_sentence(sentence,unique_stop_words=[]):
-	'''REQUIRES: a sentence
-	unique_stop_words is a list of additional stop words you define e.g. ['wall','street']
-	RETURNS: a list of tokens split by spaces without stop words
-	'''
-
-	words = []
-
-	for word in sentence.split(' '):
-		stopwords = nltk.corpus.stopwords.words('english')
-		stopwords = stopwords + unique_stop_words 
-		if not word.lower() in stopwords:
-			words.append(word.lower())
-
-	return words
-
-def tokenize_text_list(text_list,unique_stop_words=[]):
-#REQUIRES: text_list is a list of sentences; unique_stop_words is a list of additional stopwords you can define
-#RETURNS: a list of tokens without stop words
-    words = []
-    for text in text_list:
-        text = text.strip()
-        #words = [word.lower() for word in text.split(' ') if not word.lower() in nltk.corpus.stopwords.words('english')]
-        for word in text.split(' '):
-            stopwords = nltk.corpus.stopwords.words('english')
-            stopwords = stopwords + unique_stop_words 
-            if not word.lower() in stopwords:
-                words.append(word.lower())
-    return words
-
 def print_top_words(fb_text,limit = 50):
 #REQUIRES: a list of tokens
 #PRINTS THE TOP limit Words
-    fdist = nltk.FreqDist(word_tokenize(fb_text))
+    fdist = nltk.FreqDist(tokenize_text_list(fb_text))
     papername = posts_df['name'][0]
     print "%s has %s unique words" % (papername, str(len(fdist.keys())))
     fig = plt.figure(figsize = (10,6),dpi = 50)
@@ -43,27 +14,97 @@ def print_top_words(fb_text,limit = 50):
     ax.set_title("Top %s Words for %s" % (limit,papername))
     fdist.plot(limit,cumulative = True)
 
-def document_features(document):
-
-	words_list = word_tokenize(sentence)
-	#for word in words_list:
-	#	features[word] = 
-
-def build_feature_set(filepath,delim = '\t'):
+def get_word_features_set(filepath,tokenizer_func=tokenize_sentence_emote,delim = '\t'):
 	''' REQUIRES: filepath that contains training data
 	delim is optional parameter, default = \t
-	RETURNS: dictionary of features
+	RETURNS: set of unique words in training data; this will be the word features
+	for your training set
 	'''
 	
-	documents = []
+	word_list = []
 
 	if(os.path.isfile(filepath)):
 		with open(filepath,'r') as f:
 			for line in f:
 				sentiment, sentence = line.strip().split(delim)
-				documents.append((tokenize_sentence(sentence),sentiment)) 
-	
-	#features = {}
-	return documents
+				for token in tokenizer_func(sentence):
+					word_list.append(token)
 
-filepath = "training.txt"
+	word_distribution = nltk.FreqDist(word_list)
+
+	#use the top 20000 most frequent words for our training data
+	vocabulary = word_distribution.keys()[:20000]
+
+	return vocabulary
+
+def extract_feature_presence(document):
+	'''REQUIRES: set of vocabulary words and document string
+	RETURNS: dictionary of words and whether or not it's present
+	{'cat': false
+	 'dog': true
+	 ...}
+	 '''
+
+	#getting all unique words from each document
+	#this extracts word features for a binomial classifier
+	document_words = set(document)
+
+	word_features = {}
+	for word in vocabulary:
+		word_features[word] = (word in document)
+	return word_features
+
+def get_nltk_training_set(filepath,tokenizer_func = tokenize_sentence_emote,delim = '\t'):
+
+	labeled_document_list = []
+
+	if(os.path.isfile(filepath)):
+		with open(filepath,'r') as f:
+			for line in f:
+				sentiment, sentence = line.strip().split(delim)
+				temp = (tokenizer_func(sentence),sentiment)
+				labeled_document_list.append(temp)
+	
+	training_set = nltk.classify.apply_features(extract_feature_presence,labeled_document_list)
+	return training_set			
+
+
+def store_model(filepath, data):
+	'''REQUIRES: filepath and data
+	PURPOSE: allows me to save my models for later usage
+	'''
+	import pickle
+	f = open(filepath,'wb')
+	pickle.dump(classifier,f)
+	f.close()
+
+def load_model(filepath):
+	import pickle
+	f = open(filepath);
+	model = pickle.load(f)
+	f.close()
+	return(model)
+
+
+if __name__ == '__main__':
+#sample code to show how to run the classifier
+
+	import time
+	start = time.clock()
+
+	filepath = "training.txt"
+	vocabulary = get_word_features_set(filepath)
+	training_set = get_nltk_training_set(filepath)
+	classifier = nltk.NaiveBayesClassifier.train(training_set)
+	elapsed = (time.clock()-start)
+
+	print "Classifier training time is %s s " % elapsed
+	label = classifier.classify(extract_feature_presence("this is a test.. !!!"))
+	
+	if(label == 1):
+		print "Sentence is classified as positive"
+	else:
+		print "Sentence is classified as negative"
+
+	#don't forget to store your hard trained model
+	store_model("example.pickle",classifier)
