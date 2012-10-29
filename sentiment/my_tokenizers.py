@@ -33,7 +33,6 @@ def tokenize_sentence(sentence,unique_stop_words=[]):
 	unique_stop_words is a list of additional stop words you define e.g. ['wall','street']
 	RETURNS: a list of tokens split by spaces without stop words
 	'''
-
 	words = []
 
 	for word in sentence.split(' '):
