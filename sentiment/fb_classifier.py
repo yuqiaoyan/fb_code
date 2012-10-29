@@ -3,6 +3,7 @@ import nltk
 import os
 import pandas as pd
 
+
 def print_top_words(fb_text,limit = 50):
 #REQUIRES: a list of tokens
 #PRINTS THE TOP limit Words
@@ -37,8 +38,10 @@ def get_word_features_set(filepath,tokenizer_func=tokenize_sentence_emote,delim 
 
 	return vocabulary
 
+filepath = "training.txt"
+vocabulary = get_word_features_set(filepath)
 def extract_feature_presence(document):
-	'''REQUIRES: set of vocabulary words and document string
+	'''REQUIRES: set of vocabulary words and tokenized document list 
 	RETURNS: dictionary of words and whether or not it's present
 	{'cat': false
 	 'dog': true
@@ -47,11 +50,22 @@ def extract_feature_presence(document):
 
 	#getting all unique words from each document
 	#this extracts word features for a binomial classifier
+	#document_words = tokenize_sentence_emote(document) 
 	document_words = set(document)
 
+
 	word_features = {}
+	
+	count = 0
 	for word in vocabulary:
-		word_features[word] = (word in document)
+		try:
+			word_features[word] = (word in document_words)
+		except:
+			print "this is word", word
+			print "this is document", document
+			count += 1
+
+	print "Errors is ", count
 	return word_features
 
 def get_nltk_training_set(filepath,tokenizer_func = tokenize_sentence_emote,delim = '\t'):
@@ -86,13 +100,12 @@ def load_model(filepath):
 	return(model)
 
 
-if __name__ == '__main__':
+def train_classifier(filepath = "training.txt"):
 #sample code to show how to run the classifier
 
 	import time
 	start = time.clock()
 
-	filepath = "training.txt"
 	vocabulary = get_word_features_set(filepath)
 	training_set = get_nltk_training_set(filepath)
 	classifier = nltk.NaiveBayesClassifier.train(training_set)
