@@ -34,7 +34,7 @@ def get_word_features_set(filepath,tokenizer_func=tokenize_sentence_emote,delim 
 	word_distribution = nltk.FreqDist(word_list)
 
 	#use the top 20000 most frequent words for our training data
-	vocabulary = word_distribution.keys()[:20000]
+	vocabulary = word_distribution.keys()[:70000]
 
 	return vocabulary
 
@@ -89,7 +89,7 @@ def store_model(filepath, data):
 	'''
 	import pickle
 	f = open(filepath,'wb')
-	pickle.dump(classifier,f)
+	pickle.dump(data,f)
 	f.close()
 
 def load_model(filepath):
@@ -112,7 +112,7 @@ def train_classifier(filepath = "training.txt"):
 	elapsed = (time.clock()-start)
 
 	print "Classifier training time is %s s " % elapsed
-	label = classifier.classify(extract_feature_presence("this is a test.. !!!"))
+	label = classifier.classify(extract_feature_presence(tokenize_sentence_emote("this is a test.. !!!")))
 	
 	if(label == 1):
 		print "Sentence is classified as positive"
@@ -120,4 +120,8 @@ def train_classifier(filepath = "training.txt"):
 		print "Sentence is classified as negative"
 
 	#don't forget to store your hard trained model
-	store_model("example.pickle",classifier)
+	store_model("lj_70000_emote_classifier.pickle",classifier)
+	store_model("lj_70000_vocabulary.pickle",vocabulary)
+
+if __name__ == '__main__':
+	train_classifier()
