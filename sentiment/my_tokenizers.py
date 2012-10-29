@@ -47,8 +47,7 @@ def tokenize_text_list(text_list,unique_stop_words=[]):
 	'''REQUIRES: text_list is a list of sentences; unique_stop_words is a list of additional stopwords you can define
 	RETURNS: a list of tokens without stop words
 	'''
-
-    words = []
+	words = []
     for text in text_list:
         text = text.strip()
         #words = [word.lower() for word in text.split(' ') if not word.lower() in nltk.corpus.stopwords.words('english')]
