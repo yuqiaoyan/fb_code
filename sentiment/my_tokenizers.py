@@ -43,17 +43,17 @@ def tokenize_sentence(sentence,unique_stop_words=[]):
 
 	return words
 
-def tokenize_text_list(text_list,unique_stop_words=[]):
-	'''REQUIRES: text_list is a list of sentences; unique_stop_words is a list of additional stopwords you can define
-	RETURNS: a list of tokens without stop words
-	'''
-	words = []
-    for text in text_list:
-        text = text.strip()
+#def tokenize_text_list(text_list,unique_stop_words=[]):
+#	'''REQUIRES: text_list is a list of sentences; unique_stop_words is a list of additional stopwords you can define
+#	RETURNS: a list of tokens without stop words
+#	'''
+	#words = []
+    #for text in text_list:
+        #text = text.strip()
         #words = [word.lower() for word in text.split(' ') if not word.lower() in nltk.corpus.stopwords.words('english')]
-        for word in text.split(' '):
-            stopwords = nltk.corpus.stopwords.words('english')
-            stopwords = stopwords + unique_stop_words 
-            if not word.lower() in stopwords:
-                words.append(word.lower())
-    return words
+        #for word in text.split(' '):
+            #stopwords = nltk.corpus.stopwords.words('english')
+            #stopwords = stopwords + unique_stop_words 
+            #if not word.lower() in stopwords:
+                #words.append(word.lower())
+    #return words
