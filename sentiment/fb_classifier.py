@@ -34,7 +34,7 @@ def get_word_features_set(filepath,tokenizer_func=tokenize_sentence_emote,delim 
 	word_distribution = nltk.FreqDist(word_list)
 
 	#use the top 20000 most frequent words for our training data
-	vocabulary = word_distribution.keys()[:70000]
+	vocabulary = word_distribution.keys()[:20000]
 
 	return vocabulary
 
