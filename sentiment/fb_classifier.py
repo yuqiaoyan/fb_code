@@ -3,6 +3,21 @@ import nltk
 import os
 import pandas as pd
 
+def store_model(filepath, data):
+	'''REQUIRES: filepath and data
+	PURPOSE: allows me to save my models for later usage
+	'''
+	import pickle
+	f = open(filepath,'wb')
+	pickle.dump(data,f)
+	f.close()
+
+def load_model(filepath):
+	import pickle
+	f = open(filepath);
+	model = pickle.load(f)
+	f.close()
+	return(model)
 
 def print_top_words(fb_text,limit = 50):
 #REQUIRES: a list of tokens
@@ -15,7 +30,7 @@ def print_top_words(fb_text,limit = 50):
     ax.set_title("Top %s Words for %s" % (limit,papername))
     fdist.plot(limit,cumulative = True)
 
-def get_word_features_set(filepath,tokenizer_func=tokenize_sentence_emote,delim = '\t'):
+def get_word_features_set(filepath,limit,tokenizer_func=tokenize_sentence_emote,delim = '\t'):
 	''' REQUIRES: filepath that contains training data
 	delim is optional parameter, default = \t
 	RETURNS: set of unique words in training data; this will be the word features
@@ -34,12 +49,10 @@ def get_word_features_set(filepath,tokenizer_func=tokenize_sentence_emote,delim 
 	word_distribution = nltk.FreqDist(word_list)
 
 	#use the top 20000 most frequent words for our training data
-	vocabulary = word_distribution.keys()[:20000]
+	vocabulary = word_distribution.keys()[:limit]
 
 	return vocabulary
 
-filepath = "training.txt"
-vocabulary = get_word_features_set(filepath)
 def extract_feature_presence(document):
 	'''REQUIRES: set of vocabulary words and tokenized document list 
 	RETURNS: dictionary of words and whether or not it's present
@@ -47,6 +60,8 @@ def extract_feature_presence(document):
 	 'dog': true
 	 ...}
 	 '''
+	#get all word features
+	vocabulary = get_word_features_set(args.filepath,args.feature_limit)
 
 	#getting all unique words from each document
 	#this extracts word features for a binomial classifier
@@ -56,16 +71,9 @@ def extract_feature_presence(document):
 
 	word_features = {}
 	
-	count = 0
 	for word in vocabulary:
-		try:
-			word_features[word] = (word in document_words)
-		except:
-			print "this is word", word
-			print "this is document", document
-			count += 1
+		word_features[word] = (word in document_words)
 
-	print "Errors is ", count
 	return word_features
 
 def get_nltk_training_set(filepath,tokenizer_func = tokenize_sentence_emote,delim = '\t'):
@@ -81,23 +89,6 @@ def get_nltk_training_set(filepath,tokenizer_func = tokenize_sentence_emote,deli
 	
 	training_set = nltk.classify.apply_features(extract_feature_presence,labeled_document_list)
 	return training_set			
-
-
-def store_model(filepath, data):
-	'''REQUIRES: filepath and data
-	PURPOSE: allows me to save my models for later usage
-	'''
-	import pickle
-	f = open(filepath,'wb')
-	pickle.dump(data,f)
-	f.close()
-
-def load_model(filepath):
-	import pickle
-	f = open(filepath);
-	model = pickle.load(f)
-	f.close()
-	return(model)
 
 
 def train_classifier(filepath = "training.txt"):

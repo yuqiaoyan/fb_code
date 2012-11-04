@@ -2,7 +2,15 @@ from db_help import *
 import numpy as np
 import pandas as pd
 import datetime as dt
+import argparse
 from sentiment.fb_classifier import *
+
+#### PARSE COMMAND LINE ARGUMENTS ####
+parser = argparse.ArgumentParser(description='test classifiers on facebook data')
+parser.add_argument('--filepath', default = 'training.txt',help='set filepath for training data')
+parser.add_argument('--feature_limit',type=int,default = '20000',help = 'set word feature size')
+parser.add_argument('--classifier',default = 'sentiment/lj_emote_classifier.pickle')
+args = parser.parse_args()
 
 def get_comments(posts):
 	key_list = ['like_count','post_id','created_time','message','id']
@@ -86,21 +94,53 @@ def run_classify():
 	#test_posts_small.to_csv("posts_for_validation.csv",encoding = "utf-8")
 	classifier = load_model("sentiment/lj_emote_classifier.pickle")
 	test_posts_small['lj_emote_classifier']=test_posts_small['content'].map(lambda x: classifier.classify(extract_feature_presence(tokenize_sentence_emote(x))))
+
+	
 	test_posts_small.to_csv("validation/posts_lj_classified.csv", encoding = "utf-8")
 
-def run_classify_comments():
-	nytimes = get_collection_df("comments","nytimes")
-	kansas = get_collection_df("comments","kansascitystar")
-	paper_posts = nytimes.append(kansas)
 
-	#get a list of 100 random integers so we can index by them
-	rand_list = np.random.randint(0,len(paper_posts)-1,200)
 
-	#get 100 random posts for validation
-	test_posts = paper_posts.take(rand_list)
-	test_posts_small = test_posts[['message','created_time']]
-	test_posts_small.to_csv("sentiment/validation/comments_for_validation.csv",encoding = "utf-8")
-	classifier = load_model("sentiment/lj_emote_classifier.pickle")
-	test_posts_small['lj_emote_classifier']=test_posts_small['message'].map(lambda x: classifier.classify(extract_feature_presence(tokenize_sentence_emote(x))))
-	test_posts_small.to_csv("sentiment/validation/comments_lj_classified.csv", encoding = "utf-8")
+nytimes = get_collection_df("comments","nytimes")
+kansas = get_collection_df("comments","kansascitystar")
+paper_posts = nytimes.append(kansas)
+
+#get a list of 100 random integers so we can index by them
+rand_list = np.random.randint(0,len(paper_posts)-1,200)
+
+#get 100 random posts for validation
+test_posts = paper_posts.take(rand_list)
+test_posts_small = test_posts[['message','created_time','post_id']]
+
+
+post_list = [] #maintains the facebook post content associated with the comment so we can validate later
+
+
+#get post that propogated this comment
+db = initConnection("fb_train")
+for index,post_id in test_posts_small['post_id'].iteritems():
+	fb_cursor = db.posts.find({'id':post_id})
+
+	#each comment should retrieve one post
+	if(fb_cursor.count() == 1):
+		comment_post = [x for x in fb_cursor][0]
+
+		#if there is no description set it to empty
+		if(comment_post.get('description') == None): comment_post['description']=""
+
+		#if there is no message content set it to empty
+		if(comment_post.get('message') == None): comment_post['message']=""
+		post_list.append(comment_post['message']+" "+comment_post['description'])
+	elif(fb_cursor.count() == 0):
+		print "error: no post was found"
+	else:
+		print "error: duplicates were found"
+	#print "this is the comment's post",comment_post
+
+test_posts_small['post_content']= post_list
+	
+test_posts_small.to_csv("sentiment/validation/comments_for_validation.csv",encoding = "utf-8")
+classifier = load_model(args.classifier)
+test_posts_small['lj_emote_classifier']=test_posts_small['message'].map(lambda x: classifier.classify(extract_feature_presence(tokenize_sentence_emote(x))))
+test_posts_small.to_csv("sentiment/validation/comments_lj_classified.csv", encoding = "utf-8")
+	#return comment_post
 
