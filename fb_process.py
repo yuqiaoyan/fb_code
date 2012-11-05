@@ -2,15 +2,11 @@ from db_help import *
 import numpy as np
 import pandas as pd
 import datetime as dt
-import argparse
 from sentiment.fb_classifier import *
 
-#### PARSE COMMAND LINE ARGUMENTS ####
-parser = argparse.ArgumentParser(description='test classifiers on facebook data')
-parser.add_argument('--filepath', default = 'training.txt',help='set filepath for training data')
-parser.add_argument('--feature_limit',type=int,default = '20000',help = 'set word feature size')
-parser.add_argument('--classifier',default = 'sentiment/lj_emote_classifier.pickle')
-args = parser.parse_args()
+#basic filter. words gathered from google's related searches
+obama_filter = ['obama','barack','president','biden','democratic','democrat','white house','michelle']
+romney_filter = ['mitt','romney','republican','presidential candidate','paul ryan']
 
 def get_comments(posts):
 	key_list = ['like_count','post_id','created_time','message','id']
@@ -59,6 +55,11 @@ def get_posts(posts):
 	return posts_df[['name','created_time_parsed','description','message','likes','comments']]
 
 def get_collection_df(collection_name,paper):
+	'''REQUIRES: collection_name = "post" or "comments" i.e. name of collection from mongo
+	paper = facebook name of newspaper
+	RETURNS a pandas dataframe of key fields of data in September
+	'''
+
 	start = dt.datetime(2012,9,1)
 	end = dt.datetime(2012,9,30)
 
@@ -72,7 +73,7 @@ def get_collection_df(collection_name,paper):
 		posts = [x for x in fb_cursor]
 		return get_posts(posts)
 	else:
-		fb_cursor = db[collection_name].find().limit(200)
+		fb_cursor = db[collection_name].find().limit(400)
 		posts = [x for x in fb_cursor]
 		print "this is number of posts retrieved", len(posts)
 		return get_comments(posts)
@@ -100,47 +101,5 @@ def run_classify():
 
 
 
-nytimes = get_collection_df("comments","nytimes")
-kansas = get_collection_df("comments","kansascitystar")
-paper_posts = nytimes.append(kansas)
 
-#get a list of 100 random integers so we can index by them
-rand_list = np.random.randint(0,len(paper_posts)-1,200)
-
-#get 100 random posts for validation
-test_posts = paper_posts.take(rand_list)
-test_posts_small = test_posts[['message','created_time','post_id']]
-
-
-post_list = [] #maintains the facebook post content associated with the comment so we can validate later
-
-
-#get post that propogated this comment
-db = initConnection("fb_train")
-for index,post_id in test_posts_small['post_id'].iteritems():
-	fb_cursor = db.posts.find({'id':post_id})
-
-	#each comment should retrieve one post
-	if(fb_cursor.count() == 1):
-		comment_post = [x for x in fb_cursor][0]
-
-		#if there is no description set it to empty
-		if(comment_post.get('description') == None): comment_post['description']=""
-
-		#if there is no message content set it to empty
-		if(comment_post.get('message') == None): comment_post['message']=""
-		post_list.append(comment_post['message']+" "+comment_post['description'])
-	elif(fb_cursor.count() == 0):
-		print "error: no post was found"
-	else:
-		print "error: duplicates were found"
-	#print "this is the comment's post",comment_post
-
-test_posts_small['post_content']= post_list
-	
-test_posts_small.to_csv("sentiment/validation/comments_for_validation.csv",encoding = "utf-8")
-classifier = load_model(args.classifier)
-test_posts_small['lj_emote_classifier']=test_posts_small['message'].map(lambda x: classifier.classify(extract_feature_presence(tokenize_sentence_emote(x))))
-test_posts_small.to_csv("sentiment/validation/comments_lj_classified.csv", encoding = "utf-8")
-	#return comment_post
 
