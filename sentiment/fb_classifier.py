@@ -145,7 +145,7 @@ def validate_classifier():
 
 	#get a list of random integers so we can index by them
 	rand_list = np.random.randint(0,len(paper_posts)-1,200)
-	rand_list = random.sample(range(0,len(paper_posts-1)),200)
+	rand_list = random.sample(range(0,len(paper_posts)-1),200)
 
 	#get 200 random comments for validation
 	test_posts = paper_posts.take(rand_list)
