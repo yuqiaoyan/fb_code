@@ -183,7 +183,7 @@ def validate_classifier():
 		
 	test_posts_small.to_csv("sentiment/validation/political_comments_for_validation.csv",encoding = "utf-8",index=False)
 	classifier = load_model(args.classifier)
-	test_posts_small['lj_emote_classifier']=test_posts_small['message'].map(lambda x: classifier.classify(extract_feature_presence(tokenize_sentence_emote(x))))
+	test_posts_small['sentiment/lj_emote_classifier']=test_posts_small['message'].map(lambda x: classifier.classify(extract_feature_presence(tokenize_sentence_emote(x))))
 	test_posts_small.to_csv("sentiment/validation/political_comments_lj_classified.csv", encoding = "utf-8",index=False)
 		#return comment_post
 
