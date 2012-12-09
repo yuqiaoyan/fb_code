@@ -133,6 +133,8 @@ def validate_classifier():
 	kansas = get_collection_df("comments","kansascitystar")
 	paper_posts = nytimes.append(kansas,ignore_index=True)
 
+	paper_posts = paper_posts.reset_index()
+
 	#filter and label all messages related to obama and romney
 	paper_posts['political_affiliation'] = paper_posts['message'].map(lambda x: label_political_affilication(x))
 	paper_posts = paper_posts[paper_posts['political_affiliation'] != 'none']
