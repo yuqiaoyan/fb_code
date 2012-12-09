@@ -4,6 +4,7 @@ import os
 import argparse
 import pandas as pd
 import sys
+import random
 
 script_path = "/home/ubuntu/fb_code"
 sys.path.append(script_path)
