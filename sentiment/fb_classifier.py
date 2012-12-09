@@ -137,7 +137,7 @@ def validate_classifier():
 
 	#get 200 random comments for validation
 	test_posts = paper_posts.take(rand_list)
-	test_posts_small = test_posts[['message','created_time','post_id']]
+	test_posts_small = test_posts[['message','created_time','post_id','political_affiliation']]
 
 
 	post_list = [] #maintains the facebook post content associated with the comment so we can validate later
