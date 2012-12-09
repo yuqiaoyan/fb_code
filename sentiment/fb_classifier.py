@@ -171,10 +171,10 @@ def validate_classifier():
 
 	test_posts_small['post_content']= post_list
 		
-	test_posts_small.to_csv("validation/political_comments_for_validation.csv",encoding = "utf-8")
+	test_posts_small.to_csv("sentiment/validation/political_comments_for_validation.csv",encoding = "utf-8")
 	classifier = load_model(args.classifier)
 	test_posts_small['lj_emote_classifier']=test_posts_small['message'].map(lambda x: classifier.classify(extract_feature_presence(tokenize_sentence_emote(x))))
-	test_posts_small.to_csv("validation/political_comments_lj_classified.csv", encoding = "utf-8")
+	test_posts_small.to_csv("sentiment/validation/political_comments_lj_classified.csv", encoding = "utf-8")
 		#return comment_post
 
 if __name__ == '__main__':
