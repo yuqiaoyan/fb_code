@@ -133,7 +133,7 @@ def validate_classifier():
 	kansas = get_collection_df("comments","kansascitystar")
 	paper_posts = nytimes.append(kansas,ignore_index=True)
 
-	paper_posts.index = range(0,len(paper_posts)-1)
+	paper_posts.index = range(0,len(paper_posts))
 	#paper_posts = paper_posts.reset_index()
 
 	print paper_posts.index
