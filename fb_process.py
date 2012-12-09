@@ -107,7 +107,7 @@ def get_collection_df(collection_name,paper):
 		posts = [x for x in fb_cursor]
 		return get_posts(posts)
 	else:
-		fb_cursor = db[collection_name].find().limit(400)
+		fb_cursor = db[collection_name].find().limit(10000)
 		posts = [x for x in fb_cursor]
 		print "this is number of posts retrieved", len(posts)
 		return get_comments(posts)

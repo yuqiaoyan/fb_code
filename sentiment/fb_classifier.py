@@ -144,13 +144,15 @@ def validate_classifier():
 	paper_posts = paper_posts[paper_posts['political_affiliation'] != 'none']
 
 	#get a list of random integers so we can index by them
-	rand_list = np.random.randint(0,len(paper_posts)-1,200)
-	rand_list = random.sample(range(0,len(paper_posts)-1),200)
+	if(len(paper_posts)>200):
+		rand_list = random.sample(range(0,len(paper_posts)-1),200)
 
-	#get 200 random comments for validation
-	test_posts = paper_posts.take(rand_list)
+		#get 200 random comments for validation
+		test_posts = paper_posts.take(rand_list)
+	
+	print "we have %s political posts" % len(paper_posts)
+
 	test_posts_small = test_posts[['message','created_time','post_id','political_affiliation']]
-	print test_posts_small.index
 
 
 	post_list = [] #maintains the facebook post content associated with the comment so we can validate later
