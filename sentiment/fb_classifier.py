@@ -134,8 +134,8 @@ def validate_classifier():
 	paper_posts = nytimes.append(kansas,ignore_index=True)
 
 	#filter and label all messages related to obama and romney
-	test_posts['political_affiliation'] = test_posts['message'].map(lambda x: label_political_affilication(x))
-	test_posts = test_posts[test_posts['political_affiliation'] != 'none']
+	paper_posts['political_affiliation'] = paper_posts['message'].map(lambda x: label_political_affilication(x))
+	paper_posts = paper_posts[paper_posts['political_affiliation'] != 'none']
 
 	#get a list of random integers so we can index by them
 	rand_list = np.random.randint(0,len(paper_posts)-1,200)
