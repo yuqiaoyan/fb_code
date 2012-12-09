@@ -131,7 +131,7 @@ def train_classifier(filepath = "training.txt"):
 def validate_classifier():
 	nytimes = get_collection_df("comments","nytimes")
 	kansas = get_collection_df("comments","kansascitystar")
-	paper_posts = nytimes.append(kansas)
+	paper_posts = nytimes.append(kansas,ignore_index=True)
 
 	#filter and label all messages related to obama and romney
 	test_posts['political_affiliation'] = test_posts['message'].map(lambda x: label_political_affilication(x))
