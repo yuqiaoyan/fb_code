@@ -3,6 +3,11 @@ import nltk
 import os
 import argparse
 import pandas as pd
+import sys
+
+script_path = "/home/ubuntu/fb_code"
+sys.path.append(script_path)
+
 from fb_process import *
 
 #### PARSE COMMAND LINE ARGUMENTS ####
