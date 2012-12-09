@@ -128,10 +128,14 @@ def validate_classifier():
 	kansas = get_collection_df("comments","kansascitystar")
 	paper_posts = nytimes.append(kansas)
 
+	#filter and label all messages related to obama and romney
+	test_posts['political_affiliation'] = test_posts['message'].map(lambda x: label_political_affilication(x))
+	test_posts = test_posts[test_posts['political_affiliation'] != 'none']
+
 	#get a list of random integers so we can index by them
 	rand_list = np.random.randint(0,len(paper_posts)-1,200)
 
-	#get 100 random posts for validation
+	#get 200 random comments for validation
 	test_posts = paper_posts.take(rand_list)
 	test_posts_small = test_posts[['message','created_time','post_id']]
 
@@ -162,10 +166,10 @@ def validate_classifier():
 
 	test_posts_small['post_content']= post_list
 		
-	test_posts_small.to_csv("validation/comments_for_validation.csv",encoding = "utf-8")
+	test_posts_small.to_csv("validation/political_comments_for_validation.csv",encoding = "utf-8")
 	classifier = load_model(args.classifier)
 	test_posts_small['lj_emote_classifier']=test_posts_small['message'].map(lambda x: classifier.classify(extract_feature_presence(tokenize_sentence_emote(x))))
-	test_posts_small.to_csv("validation/comments_lj_classified.csv", encoding = "utf-8")
+	test_posts_small.to_csv("validation/political_comments_lj_classified.csv", encoding = "utf-8")
 		#return comment_post
 
 if __name__ == '__main__':

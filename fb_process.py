@@ -5,8 +5,40 @@ import datetime as dt
 from sentiment.fb_classifier import *
 
 #basic filter. words gathered from google's related searches
-obama_filter = ['obama','barack','president','biden','democratic','democrat','white house','michelle']
-romney_filter = ['mitt','romney','republican','presidential candidate','paul ryan']
+obama_filter = set(['obama','barack','president','biden','democratic','democrat','white house','michelle'])
+romney_filter = set(['mitt','romney','republican','presidential candidate','paul ryan'])
+
+def is_political(a_sentence):
+	'''REQUIRES A SENTENCE AND CHECKS IF THE SENTENCE CONTAINS A WORD IN OUR POLITICAL filter
+	This checks for whole words only
+	'''
+
+	is_obama = True
+	is_romney = True
+
+	unique_words = a_sentence.lower().split()
+
+	if(len(obama_filter.intersection(unique_words)) == 0):
+		is_obama = False
+
+	if(len(romney_filter.intersection(unique_words)) == 0):
+		is_romney = False
+
+	return is_obama, is_romney
+
+
+def label_political_affilication(a_sentence):
+	is_obama, is_romney = is_political(a_sentence)
+	
+	#label both if it mentions both is_obama and is_romney
+	if(is_obama and is_romney): return "both"
+
+	if(is_obama): return "obama"
+
+	if(is_romney): return "romney"
+
+	return "none"
+
 
 def get_comments(posts):
 	key_list = ['like_count','post_id','created_time','message','id']
@@ -14,6 +46,8 @@ def get_comments(posts):
 	new_post = {}
 
 	for post in posts:
+		
+
 		for key in key_list:
 			if(post.get(key)):
 				new_post[key] = post[key]
@@ -73,7 +107,7 @@ def get_collection_df(collection_name,paper):
 		posts = [x for x in fb_cursor]
 		return get_posts(posts)
 	else:
-		fb_cursor = db[collection_name].find().limit(400)
+		fb_cursor = db[collection_name].find().limit(4000)
 		posts = [x for x in fb_cursor]
 		print "this is number of posts retrieved", len(posts)
 		return get_comments(posts)
@@ -91,6 +125,8 @@ def run_classify():
 	#get 100 random posts for validation
 	test_posts = paper_posts.take(rand_list)
 	test_posts['content']=test_posts['description']+" "+test_posts['message']
+	test_posts['political_affiliation'] = test_posts['content'].map(lambda x: label_political_affilication(x))
+
 	test_posts_small = test_posts[['content','name']]
 	#test_posts_small.to_csv("posts_for_validation.csv",encoding = "utf-8")
 	classifier = load_model("sentiment/lj_emote_classifier.pickle")
